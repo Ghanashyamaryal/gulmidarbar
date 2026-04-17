@@ -1,17 +1,33 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { issues as initialIssues, Issue } from '@/data/issues';
 import AdminTable from '@/components/AdminTable';
+import { deleteIssue, getIssues, updateIssueStatus, type Issue, type IssueStatus } from '@/lib/issues';
 
 export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
-  const [issues, setIssues] = useState<Issue[]>(initialIssues);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
   const [wardFilter, setWardFilter] = useState<number | null>(null);
+
+  const loadIssues = async () => {
+    setLoading(true);
+    try {
+      setIssues(await getIssues());
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) loadIssues();
+  }, [isLoggedIn]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,13 +39,25 @@ export default function AdminPage() {
     }
   };
 
-  const handleStatusChange = (id: number, status: Issue['status']) => {
-    setIssues(issues.map((i) => (i.id === id ? { ...i, status } : i)));
+  const handleStatusChange = async (id: string, status: IssueStatus) => {
+    setIssues((prev) => prev.map((i) => (i.id === id ? { ...i, status } : i)));
+    try {
+      await updateIssueStatus(id, status);
+    } catch (e) {
+      console.error(e);
+      loadIssues();
+    }
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm('के तपाईं यो समस्या मेटाउन चाहनुहुन्छ?')) {
-      setIssues(issues.filter((i) => i.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm('के तपाईं यो समस्या मेटाउन चाहनुहुन्छ?')) return;
+    const prev = issues;
+    setIssues((p) => p.filter((i) => i.id !== id));
+    try {
+      await deleteIssue(id);
+    } catch (e) {
+      console.error(e);
+      setIssues(prev);
     }
   };
 
@@ -121,16 +149,25 @@ export default function AdminPage() {
               </h1>
               <p className="text-muted mt-2">समस्याहरूको स्थिति अद्यावधिक, समीक्षा र हटाउनुहोस्।</p>
             </div>
-            <button
-              onClick={() => setIsLoggedIn(false)}
-              className="btn-ghost"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <path d="M16 17l5-5-5-5M21 12H9" />
-              </svg>
-              लगआउट
-            </button>
+            <div className="flex gap-3">
+              <button onClick={loadIssues} className="btn-ghost" disabled={loading}>
+                <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 4v6h-6M1 20v-6h6" />
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                </svg>
+                {loading ? 'लोड हुँदै' : 'रिफ्रेस'}
+              </button>
+              <button
+                onClick={() => setIsLoggedIn(false)}
+                className="btn-ghost"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <path d="M16 17l5-5-5-5M21 12H9" />
+                </svg>
+                लगआउट
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -187,11 +224,15 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <AdminTable
-          issues={filtered}
-          onStatusChange={handleStatusChange}
-          onDelete={handleDelete}
-        />
+        {loading && issues.length === 0 ? (
+          <div className="card p-10 text-center text-muted">लोड हुँदैछ...</div>
+        ) : (
+          <AdminTable
+            issues={filtered}
+            onStatusChange={handleStatusChange}
+            onDelete={handleDelete}
+          />
+        )}
       </section>
     </div>
   );

@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /issues/{issueId} {
+      // Public can read all issues
+      allow read: if true;
+
+      // Public can create new issues with required fields and valid ward
+      allow create: if
+        request.resource.data.keys().hasAll(['title', 'description', 'ward', 'status', 'createdAt'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() < 200
+        && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
+        && request.resource.data.description.size() < 5000
+        && request.resource.data.ward is number
+        && request.resource.data.ward >= 1
+        && request.resource.data.ward <= 7
+        && request.resource.data.status in ['विचाराधीन', 'प्रगति हुँदैछ', 'समाधान भएको'];
+
+      // TODO: Lock down updates/deletes with Firebase Auth + admin claim.
+      // For now, open for the demo admin panel — CHANGE BEFORE PRODUCTION.
+      allow update, delete: if true;
+    }
+  }
+}

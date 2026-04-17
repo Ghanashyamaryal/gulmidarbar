@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { addIssue } from '@/lib/issues';
 
 export default function SubmitPage() {
   const [formData, setFormData] = useState({
@@ -13,10 +14,28 @@ export default function SubmitPage() {
   });
   const [file, setFile] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError('');
+    setSubmitting(true);
+    try {
+      await addIssue({
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        ward: parseInt(formData.ward, 10),
+        name: formData.name.trim() || undefined,
+        phone: formData.phone.trim() || undefined,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      setError('रिपोर्ट पेश गर्न सकिएन। कृपया पुनः प्रयास गर्नुहोस्।');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -71,6 +90,15 @@ export default function SubmitPage() {
       <section className="container mx-auto px-4 py-10">
         <div className="grid lg:grid-cols-[1fr_340px] gap-8">
           <form onSubmit={handleSubmit} className="card p-7 md:p-9 space-y-6">
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
+                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v4M12 16h.01" />
+                </svg>
+                {error}
+              </div>
+            )}
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
                 शीर्षक <span className="text-accent">*</span>
@@ -163,14 +191,19 @@ export default function SubmitPage() {
                 </div>
                 <div className="text-xs text-muted mt-1">PNG, JPG वा PDF (अधिकतम १० MB)</div>
               </label>
+              <p className="text-xs text-muted mt-2">
+                नोट: फाइल अपलोड सुविधा छिट्टै Firebase Storage मार्फत सक्रिय हुनेछ।
+              </p>
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <button type="submit" className="btn-primary">
-                रिपोर्ट पेश गर्नुहोस्
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M13 5l7 7-7 7" />
-                </svg>
+              <button type="submit" className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed" disabled={submitting}>
+                {submitting ? 'पेश हुँदैछ...' : 'रिपोर्ट पेश गर्नुहोस्'}
+                {!submitting && (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                )}
               </button>
               <Link href="/issues" className="btn-ghost">रद्द गर्नुहोस्</Link>
             </div>

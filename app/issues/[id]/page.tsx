@@ -1,22 +1,50 @@
+'use client';
+
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { issues } from '@/data/issues';
+import { use, useEffect, useState } from 'react';
 import StatusBadge from '@/components/StatusBadge';
 import IssueCard from '@/components/IssueCard';
+import { getIssueById, getIssues, type Issue } from '@/lib/issues';
 
-export default async function IssueDetailPage({
+export default function IssueDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const issue = issues.find((i) => i.id === parseInt(id));
+  const { id } = use(params);
+  const [issue, setIssue] = useState<Issue | null | undefined>(undefined);
+  const [related, setRelated] = useState<Issue[]>([]);
 
-  if (!issue) notFound();
+  useEffect(() => {
+    (async () => {
+      const found = await getIssueById(id);
+      if (!found) {
+        setIssue(null);
+        return;
+      }
+      setIssue(found);
+      const all = await getIssues();
+      setRelated(
+        all
+          .filter((i) => i.id !== found.id && (i.ward === found.ward || i.status === found.status))
+          .slice(0, 3)
+      );
+    })().catch((e) => {
+      console.error(e);
+      setIssue(null);
+    });
+  }, [id]);
 
-  const related = issues
-    .filter((i) => i.id !== issue.id && (i.ward === issue.ward || i.status === issue.status))
-    .slice(0, 3);
+  if (issue === undefined) {
+    return (
+      <div className="container mx-auto px-4 py-20">
+        <div className="card p-12 animate-pulse bg-slate-50 h-96" />
+      </div>
+    );
+  }
+
+  if (issue === null) notFound();
 
   return (
     <div>
@@ -112,7 +140,7 @@ export default async function IssueDetailPage({
               <dl className="space-y-3 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="text-muted">आईडी</dt>
-                  <dd className="font-mono font-semibold">#{issue.id}</dd>
+                  <dd className="font-mono font-semibold text-xs">#{issue.id.slice(0, 6)}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-muted">वार्ड</dt>

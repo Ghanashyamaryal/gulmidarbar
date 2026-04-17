@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Issue } from '@/data/issues';
+import { Issue } from '@/lib/issues';
 import StatusBadge from './StatusBadge';
 
 interface IssueCardProps {

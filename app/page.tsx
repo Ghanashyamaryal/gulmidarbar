@@ -1,12 +1,32 @@
+'use client';
+
 import Link from 'next/link';
-import { issues } from '@/data/issues';
+import { useEffect, useMemo, useState } from 'react';
 import IssueCard from '@/components/IssueCard';
+import { getIssues, type Issue } from '@/lib/issues';
 
 export default function Home() {
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getIssues()
+      .then(setIssues)
+      .catch((e) => console.error('Failed to fetch issues', e))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const stats = useMemo(
+    () => ({
+      total: issues.length,
+      resolved: issues.filter((i) => i.status === 'समाधान भएको').length,
+      inProgress: issues.filter((i) => i.status === 'प्रगति हुँदैछ').length,
+      pending: issues.filter((i) => i.status === 'विचाराधीन').length,
+    }),
+    [issues]
+  );
+
   const recentIssues = issues.slice(0, 6);
-  const resolved = issues.filter((i) => i.status === 'समाधान भएको').length;
-  const inProgress = issues.filter((i) => i.status === 'प्रगति हुँदैछ').length;
-  const pending = issues.filter((i) => i.status === 'विचाराधीन').length;
 
   const categories = [
     { title: 'सडक र पुल', desc: 'सडक मर्मत, पुल निर्माण, सडक बत्ती', icon: 'M3 12h18M5 12v8h14v-8M7 12V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v6' },
@@ -20,26 +40,10 @@ export default function Home() {
   ];
 
   const steps = [
-    {
-      num: '०१',
-      title: 'रिपोर्ट गर्नुहोस्',
-      desc: 'वार्ड छानेर समस्याको शीर्षक, विवरण र प्रमाण (तस्वीर/PDF) समावेश गर्नुहोस्।',
-    },
-    {
-      num: '०२',
-      title: 'प्रशासनद्वारा जाँच',
-      desc: 'गाउँपालिकाको सम्बन्धित शाखाले तपाईंको रिपोर्टको समीक्षा र प्राथमिकीकरण गर्छ।',
-    },
-    {
-      num: '०३',
-      title: 'प्रगति अद्यावधिक',
-      desc: 'समस्या “प्रगति हुँदैछ” बाट “समाधान भएको” सम्म सार्वजनिक रूपमा ट्र्याक गर्न सकिन्छ।',
-    },
-    {
-      num: '०४',
-      title: 'समाधान र जवाफ',
-      desc: 'समस्या समाधान हुनासाथ प्रशासनले सार्वजनिक रूपमा स्थिति अद्यावधिक गर्दछ।',
-    },
+    { num: '०१', title: 'रिपोर्ट गर्नुहोस्', desc: 'वार्ड छानेर समस्याको शीर्षक, विवरण र प्रमाण (तस्वीर/PDF) समावेश गर्नुहोस्।' },
+    { num: '०२', title: 'प्रशासनद्वारा जाँच', desc: 'गाउँपालिकाको सम्बन्धित शाखाले तपाईंको रिपोर्टको समीक्षा र प्राथमिकीकरण गर्छ।' },
+    { num: '०३', title: 'प्रगति अद्यावधिक', desc: 'समस्या "प्रगति हुँदैछ" बाट "समाधान भएको" सम्म सार्वजनिक रूपमा ट्र्याक गर्न सकिन्छ।' },
+    { num: '०४', title: 'समाधान र जवाफ', desc: 'समस्या समाधान हुनासाथ प्रशासनले सार्वजनिक रूपमा स्थिति अद्यावधिक गर्दछ।' },
   ];
 
   const features = [
@@ -52,22 +56,10 @@ export default function Home() {
   ];
 
   const faqs = [
-    {
-      q: 'के यो सेवा निःशुल्क हो?',
-      a: 'हो, गुल्मी दरबार गाउँपालिकाका सबै नागरिकका लागि यो सेवा पूर्णतया निःशुल्क छ।',
-    },
-    {
-      q: 'रिपोर्ट गरेपछि कति समयमा प्रतिक्रिया आउँछ?',
-      a: 'सामान्य रिपोर्टहरूलाई ३-५ कार्य दिनभित्र प्रशासनले समीक्षा गर्दछ। आपतकालीन समस्याहरूलाई अग्राधिकार दिइन्छ।',
-    },
-    {
-      q: 'के म अनाम रूपमा रिपोर्ट गर्न सक्छु?',
-      a: 'हो। तर रिपोर्टको पुष्टि र थप जानकारीका लागि सम्पर्क विवरण दिनु सुझाव दिइन्छ।',
-    },
-    {
-      q: 'मेरो रिपोर्टको स्थिति कसरी हेर्ने?',
-      a: '“समस्याहरू” पृष्ठमा गई आफ्नो वार्ड छानेर रिपोर्टको अवस्था (विचाराधीन / प्रगति हुँदैछ / समाधान भएको) हेर्न सकिन्छ।',
-    },
+    { q: 'के यो सेवा निःशुल्क हो?', a: 'हो, गुल्मी दरबार गाउँपालिकाका सबै नागरिकका लागि यो सेवा पूर्णतया निःशुल्क छ।' },
+    { q: 'रिपोर्ट गरेपछि कति समयमा प्रतिक्रिया आउँछ?', a: 'सामान्य रिपोर्टहरूलाई ३-५ कार्य दिनभित्र प्रशासनले समीक्षा गर्दछ। आपतकालीन समस्याहरूलाई अग्राधिकार दिइन्छ।' },
+    { q: 'के म अनाम रूपमा रिपोर्ट गर्न सक्छु?', a: 'हो। तर रिपोर्टको पुष्टि र थप जानकारीका लागि सम्पर्क विवरण दिनु सुझाव दिइन्छ।' },
+    { q: 'मेरो रिपोर्टको स्थिति कसरी हेर्ने?', a: '"समस्याहरू" पृष्ठमा गई आफ्नो वार्ड छानेर रिपोर्टको अवस्था (विचाराधीन / प्रगति हुँदैछ / समाधान भएको) हेर्न सकिन्छ।' },
   ];
 
   return (
@@ -144,32 +136,36 @@ export default function Home() {
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: 'कुल', value: issues.length, tone: 'bg-slate-50 text-slate-700' },
-                    { label: 'समाधान', value: resolved, tone: 'bg-emerald-50 text-emerald-700' },
-                    { label: 'बाँकी', value: pending + inProgress, tone: 'bg-amber-50 text-amber-700' },
+                    { label: 'कुल', value: stats.total, tone: 'bg-slate-50 text-slate-700' },
+                    { label: 'समाधान', value: stats.resolved, tone: 'bg-emerald-50 text-emerald-700' },
+                    { label: 'बाँकी', value: stats.pending + stats.inProgress, tone: 'bg-amber-50 text-amber-700' },
                   ].map((s) => (
                     <div key={s.label} className={`${s.tone} rounded-xl p-4 text-center`}>
-                      <div className="text-2xl font-bold">{s.value}</div>
+                      <div className="text-2xl font-bold">{loading ? '—' : s.value}</div>
                       <div className="text-xs font-medium mt-1 opacity-80">{s.label}</div>
                     </div>
                   ))}
                 </div>
                 <div className="mt-6 space-y-3">
-                  {recentIssues.slice(0, 3).map((issue) => (
-                    <Link
-                      key={issue.id}
-                      href={`/issues/${issue.id}`}
-                      className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-slate-50 transition"
-                    >
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-foreground truncate">{issue.title}</div>
-                        <div className="text-xs text-muted">वार्ड {issue.ward} · {issue.createdAt}</div>
-                      </div>
-                      <svg className="w-4 h-4 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
-                    </Link>
-                  ))}
+                  {loading
+                    ? [1, 2, 3].map((i) => (
+                        <div key={i} className="h-12 rounded-lg bg-slate-100 animate-pulse" />
+                      ))
+                    : recentIssues.slice(0, 3).map((issue) => (
+                        <Link
+                          key={issue.id}
+                          href={`/issues/${issue.id}`}
+                          className="flex items-center justify-between gap-3 p-3 rounded-lg hover:bg-slate-50 transition"
+                        >
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-foreground truncate">{issue.title}</div>
+                            <div className="text-xs text-muted">वार्ड {issue.ward} · {issue.createdAt}</div>
+                          </div>
+                          <svg className="w-4 h-4 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6" />
+                          </svg>
+                        </Link>
+                      ))}
                 </div>
               </div>
             </div>
@@ -182,9 +178,9 @@ export default function Home() {
         <div className="card p-6 md:p-8 shadow-xl shadow-slate-900/5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {[
-              { label: 'कुल रिपोर्ट', value: issues.length, icon: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z' },
-              { label: 'समाधान भएका', value: resolved, icon: 'M20 6L9 17l-5-5' },
-              { label: 'प्रगतिमा', value: inProgress, icon: 'M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z' },
+              { label: 'कुल रिपोर्ट', value: stats.total, icon: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z' },
+              { label: 'समाधान भएका', value: stats.resolved, icon: 'M20 6L9 17l-5-5' },
+              { label: 'प्रगतिमा', value: stats.inProgress, icon: 'M12 8v4l3 3M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z' },
               { label: 'सक्रिय वार्ड', value: 7, icon: 'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z' },
             ].map((s) => (
               <div key={s.label} className="flex items-center gap-4">
@@ -194,7 +190,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <div className="text-2xl md:text-3xl font-bold text-foreground">{s.value}</div>
+                  <div className="text-2xl md:text-3xl font-bold text-foreground">{loading ? '—' : s.value}</div>
                   <div className="text-sm text-muted">{s.label}</div>
                 </div>
               </div>
@@ -225,7 +221,7 @@ export default function Home() {
                   {ward}
                 </div>
                 <div className="font-semibold text-foreground mt-1">वार्ड {ward}</div>
-                <div className="text-xs text-muted">{count} रिपोर्ट</div>
+                <div className="text-xs text-muted">{loading ? '...' : `${count} रिपोर्ट`}</div>
               </Link>
             );
           })}
@@ -301,11 +297,23 @@ export default function Home() {
               </svg>
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {recentIssues.map((issue) => (
-              <IssueCard key={issue.id} issue={issue} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="card p-5 h-48 animate-pulse bg-slate-50" />
+              ))}
+            </div>
+          ) : recentIssues.length === 0 ? (
+            <div className="card p-10 text-center text-muted">
+              अझै कुनै रिपोर्ट छैन। पहिलो रिपोर्ट तपाईं नै गर्नुहोस्!
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {recentIssues.map((issue) => (
+                <IssueCard key={issue.id} issue={issue} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -351,27 +359,15 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              {
-                name: 'सुनीता पौडेल',
-                ward: 'वार्ड ३',
-                text: 'मैले सडक बत्तीको रिपोर्ट गरेको केही दिनमै समाधान भयो। यस्तो पारदर्शी सेवा साँच्चै प्रभावकारी छ।',
-              },
-              {
-                name: 'रामेश्वर के.सी.',
-                ward: 'वार्ड ५',
-                text: 'पहिले कार्यालय धाउनुपर्थ्यो, अब घरबाटै रिपोर्ट गर्न पाएर सजिलो भएको छ। प्रगति पनि हेर्न पाइन्छ।',
-              },
-              {
-                name: 'गीता गुरुङ',
-                ward: 'वार्ड १',
-                text: 'पानी आपूर्ति समस्या मैले यही पोर्टलमार्फत उठाएकी थिएँ। प्रशासनको प्रतिक्रिया धेरै छिटो आयो।',
-              },
+              { name: 'सुनीता पौडेल', ward: 'वार्ड ३', text: 'मैले सडक बत्तीको रिपोर्ट गरेको केही दिनमै समाधान भयो। यस्तो पारदर्शी सेवा साँच्चै प्रभावकारी छ।' },
+              { name: 'रामेश्वर के.सी.', ward: 'वार्ड ५', text: 'पहिले कार्यालय धाउनुपर्थ्यो, अब घरबाटै रिपोर्ट गर्न पाएर सजिलो भएको छ। प्रगति पनि हेर्न पाइन्छ।' },
+              { name: 'गीता गुरुङ', ward: 'वार्ड १', text: 'पानी आपूर्ति समस्या मैले यही पोर्टलमार्फत उठाएकी थिएँ। प्रशासनको प्रतिक्रिया धेरै छिटो आयो।' },
             ].map((t) => (
               <div key={t.name} className="card p-6">
                 <svg className="w-8 h-8 text-primary/30 mb-3" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M7 7h4v4H9a2 2 0 0 0-2 2v2H3v-4c0-2.2 1.8-4 4-4zM17 7h4v4h-2a2 2 0 0 0-2 2v2h-4v-4c0-2.2 1.8-4 4-4z" />
                 </svg>
-                <p className="text-foreground/90 leading-relaxed">“{t.text}”</p>
+                <p className="text-foreground/90 leading-relaxed">&ldquo;{t.text}&rdquo;</p>
                 <div className="mt-5 pt-5 border-t border-border flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-linear-to-br from-primary to-accent text-white flex items-center justify-center font-semibold">
                     {t.name.slice(0, 1)}

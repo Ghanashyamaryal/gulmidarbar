@@ -1,10 +1,10 @@
-import { Issue } from '@/data/issues';
+import { Issue, IssueStatus } from '@/lib/issues';
 import StatusBadge from './StatusBadge';
 
 interface AdminTableProps {
   issues: Issue[];
-  onStatusChange: (id: number, status: Issue['status']) => void;
-  onDelete: (id: number) => void;
+  onStatusChange: (id: string, status: IssueStatus) => void;
+  onDelete: (id: string) => void;
 }
 
 export default function AdminTable({ issues, onStatusChange, onDelete }: AdminTableProps) {
@@ -25,7 +25,7 @@ export default function AdminTable({ issues, onStatusChange, onDelete }: AdminTa
           <tbody className="divide-y divide-border">
             {issues.map((issue) => (
               <tr key={issue.id} className="hover:bg-slate-50/60 transition">
-                <td className="px-5 py-4 font-mono text-xs text-muted">#{issue.id}</td>
+                <td className="px-5 py-4 font-mono text-xs text-muted">#{issue.id.slice(0, 6)}</td>
                 <td className="px-5 py-4 font-medium text-foreground max-w-xs truncate">
                   {issue.title}
                 </td>
@@ -35,7 +35,7 @@ export default function AdminTable({ issues, onStatusChange, onDelete }: AdminTa
                     <StatusBadge status={issue.status} />
                     <select
                       value={issue.status}
-                      onChange={(e) => onStatusChange(issue.id, e.target.value as Issue['status'])}
+                      onChange={(e) => onStatusChange(issue.id, e.target.value as IssueStatus)}
                       className="text-xs border border-border rounded-md px-2 py-1 bg-white"
                     >
                       <option value="विचाराधीन">विचाराधीन</option>

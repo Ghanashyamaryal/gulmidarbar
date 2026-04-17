@@ -1,13 +1,15 @@
-export interface Issue {
+import type { IssueStatus } from '@/lib/issues';
+
+export interface SeedIssue {
   id: number;
   title: string;
   description: string;
   ward: number;
-  status: 'विचाराधीन' | 'प्रगति हुँदैछ' | 'समाधान भएको';
+  status: IssueStatus;
   createdAt: string;
 }
 
-export const issues: Issue[] = [
+export const seedIssues: SeedIssue[] = [
   // Ward 1
   {
     id: 1,
