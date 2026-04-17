@@ -21,18 +21,31 @@ export default function SubmitPage() {
     e.preventDefault();
     setError('');
     setSubmitting(true);
+
+    const payload = {
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      ward: parseInt(formData.ward, 10),
+      name: formData.name.trim() || undefined,
+      phone: formData.phone.trim() || undefined,
+    };
+
+    console.log('[submit] sending to Firestore:', payload);
+
+    if (!payload.title || !payload.description || isNaN(payload.ward)) {
+      setError('सबै आवश्यक फिल्ड भर्नुहोस्।');
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      await addIssue({
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        ward: parseInt(formData.ward, 10),
-        name: formData.name.trim() || undefined,
-        phone: formData.phone.trim() || undefined,
-      });
+      const id = await addIssue(payload);
+      console.log('[submit] ✅ Firestore wrote doc id:', id);
       setSubmitted(true);
     } catch (err) {
-      console.error(err);
-      setError('रिपोर्ट पेश गर्न सकिएन। कृपया पुनः प्रयास गर्नुहोस्।');
+      console.error('[submit] ❌ Firestore write failed:', err);
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`रिपोर्ट पेश गर्न सकिएन: ${message}`);
     } finally {
       setSubmitting(false);
     }
