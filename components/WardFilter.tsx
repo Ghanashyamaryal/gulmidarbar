@@ -8,44 +8,57 @@ export default function WardFilter({ selectedWard, onWardChange }: WardFilterPro
 
   return (
     <div className="card p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <div>
           <h3 className="font-semibold text-foreground">वार्ड अनुसार फिल्टर</h3>
-          <p className="text-xs text-muted mt-0.5">कुनै वार्डको समस्याहरू मात्र हेर्न चयन गर्नुहोस्</p>
+          <p className="text-xs text-muted mt-0.5">वार्ड छानेर समस्याहरू हेर्नुहोस्</p>
         </div>
         {selectedWard !== null && (
           <button
             onClick={() => onWardChange(null)}
             className="text-xs font-medium text-primary hover:underline"
           >
-            क्लियर गर्नुहोस्
+            क्लियर
           </button>
         )}
       </div>
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => onWardChange(null)}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-            selectedWard === null
-              ? 'bg-primary text-white shadow-md shadow-primary/30'
-              : 'bg-slate-100 text-foreground/80 hover:bg-slate-200'
-          }`}
+
+      <div className="relative">
+        <svg
+          className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          सबै
-        </button>
-        {wards.map((w) => (
-          <button
-            key={w}
-            onClick={() => onWardChange(w)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-              selectedWard === w
-                ? 'bg-primary text-white shadow-md shadow-primary/30'
-                : 'bg-slate-100 text-foreground/80 hover:bg-slate-200'
-            }`}
-          >
-            वार्ड {w}
-          </button>
-        ))}
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+          <circle cx="12" cy="10" r="3" />
+        </svg>
+        <select
+          value={selectedWard ?? ''}
+          onChange={(e) => onWardChange(e.target.value === '' ? null : parseInt(e.target.value))}
+          className="input-field pl-10 pr-10 appearance-none cursor-pointer"
+        >
+          <option value="">सबै वार्डहरू</option>
+          {wards.map((w) => (
+            <option key={w} value={w}>
+              वार्ड {w}
+            </option>
+          ))}
+        </select>
+        <svg
+          className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
       </div>
     </div>
   );

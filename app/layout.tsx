@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Sans_Devanagari } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Noto_Sans_Devanagari,
+  Noto_Serif_Devanagari,
+} from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -18,6 +23,14 @@ const notoNepali = Noto_Sans_Devanagari({
   variable: "--font-nepali",
   subsets: ["devanagari", "latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const notoNepaliSerif = Noto_Serif_Devanagari({
+  variable: "--font-nepali-serif",
+  subsets: ["devanagari", "latin"],
+  weight: ["500", "600", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -34,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="ne"
-      className={`${geistSans.variable} ${geistMono.variable} ${notoNepali.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoNepali.variable} ${notoNepaliSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Navbar />

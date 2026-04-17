@@ -152,7 +152,7 @@ export default function AdminPage() {
 
         <div className="card p-5 flex flex-wrap gap-3 items-center justify-between">
           <div className="relative flex-1 min-w-60 max-w-md">
-            <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.3-4.3" />
             </svg>
@@ -161,7 +161,7 @@ export default function AdminPage() {
               placeholder="शीर्षकद्वारा खोज्नुहोस्..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="input-field pl-9"
+              className="input-field pl-11"
             />
           </div>
           <div className="flex flex-wrap gap-2">
