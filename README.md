@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# गुल्मी दरबार गाउँपालिका - समस्या रिपोर्टिङ प्रणाली
 
-## Getting Started
+गुल्मी दरबार गाउँपालिकाका लागि स्थानीय समस्या रिपोर्टिङ वेब एप्लिकेसन। यो एप्लिकेसन Next.js र Tailwind CSS प्रयोग गरी बनाइएको छ।
 
-First, run the development server:
+## विशेषताहरू
 
+- ७ वटा वार्डहरूका लागि समस्या रिपोर्टिङ
+- प्रयोगकर्ताहरूले समस्याहरू हेर्न र रिपोर्ट गर्न सक्छन्
+- प्रशासन प्यानलमा समस्या व्यवस्थापन
+- मोबाइल-अनुकूल डिजाइन
+- नेपाली भाषामा पूर्ण इन्टरफेस
+
+## प्रविधिहरू
+
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **ESLint**
+
+## स्थापना र चलाउनुहोस्
+
+1. डिपेन्डेन्सीहरू इन्स्टल गर्नुहोस्:
+   ```bash
+   npm install
+   ```
+
+2. विकास सर्भर चलाउनुहोस्:
+   ```bash
+   npm run dev
+   ```
+
+3. ब्राउजरमा [http://localhost:3000](http://localhost:3000) खोल्नुहोस्।
+
+## पृष्ठहरू
+
+- **/** - गृहपृष्ठ (वार्ड छनोट र हालका समस्याहरू)
+- **/issues** - सबै समस्याहरू (वार्ड अनुसार फिल्टर)
+- **/issues/[id]** - समस्या विवरण
+- **/submit** - नयाँ समस्या पेश गर्नुहोस्
+- **/admin** - प्रशासन प्यानल (लगइन आवश्यक)
+
+## प्रशासन लगइन
+
+- प्रयोगकर्ता नाम: `admin`
+- पासवर्ड: `admin123`
+
+## डाटा संरचना
+
+समस्याहरू `/data/issues.ts` मा संग्रहित छन्। प्रत्येक समस्यामा:
+- id
+- title (शीर्षक)
+- description (विवरण)
+- ward (वार्ड)
+- status (स्थिति: विचाराधीन, प्रगति हुँदैछ, समाधान भएको)
+- createdAt (सिर्जना मिति)
+
+## भविष्यको एकीकरण
+
+यो परियोजना Supabase सँग एकीकरणका लागि तयार छ। `/lib/supabase.ts` मा प्लेसहोल्डर तयार गरिएको छ।
+
+## निर्माण गर्नुहोस्
+
+प्रोडक्सन निर्माण गर्न:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## थप जानकारी
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- सबै टेक्स्ट नेपालीमा छन्
+- डमी डाटा प्रयोग गरिएको छ
+- प्रशासन प्यानलमा समस्या स्थिति परिवर्तन र मेटाउन सकिन्छ
